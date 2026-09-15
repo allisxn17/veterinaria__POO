@@ -455,3 +455,152 @@ def ejecutar_programa():
         nombre="Carlos Martínez"
     )
 
+# --------------------------------------------------------
+    # R2 - REGISTRAR CONSULTA
+    # --------------------------------------------------------
+
+    consulta = Consulta(
+        id="C001",
+        mascota=mascota,
+        veterinario=veterinario,
+        fecha=datetime.now(),
+        sintomas=[
+            Sintoma("Fiebre"),
+            Sintoma("Tos"),
+            Sintoma("Pérdida de apetito")
+        ],
+        observaciones=(
+            "La mascota presenta decaimiento "
+            "y poco apetito."
+        )
+    )
+
+    print("\nR2 - CONSULTA REGISTRADA")
+    print(f"ID: {consulta.id}")
+    print("Síntomas:")
+
+    for sintoma in consulta.sintomas:
+        print(f"- {sintoma.nombre}")
+
+    # --------------------------------------------------------
+    # R3 - ANALIZAR MOLESTIAS
+    # --------------------------------------------------------
+
+    print("\nR3 - ANÁLISIS DE MOLESTIAS")
+
+    resultados = consulta.analizar_molestias(enfermedades)
+
+    mostrar_resultados_analisis(resultados)
+
+    # --------------------------------------------------------
+    # R4 - REGISTRAR DIAGNÓSTICO
+    # --------------------------------------------------------
+
+    if len(consulta.enfermedades_posibles) > 0:
+
+        # El sistema solo sugiere; el veterinario escoge.
+        enfermedad_seleccionada = (
+            consulta.enfermedades_posibles[0]
+        )
+
+        veterinario.establecer_diagnostico(
+            consulta,
+            enfermedad_seleccionada,
+            "Diagnóstico confirmado por el veterinario."
+        )
+
+        print("\nR4 - DIAGNÓSTICO REGISTRADO")
+        print(
+            "Diagnóstico final:",
+            consulta.enfermedad_diagnosticada.nombre
+        )
+        print(
+            "Observaciones:",
+            consulta.observaciones_diagnostico
+        )
+
+    else:
+
+        print(
+            "\nR4 - No hay enfermedades posibles, "
+            "no se puede registrar un diagnóstico."
+        )
+
+    # --------------------------------------------------------
+    # R6 - CONSULTAR HISTORIAL MÉDICO
+    # --------------------------------------------------------
+
+    mostrar_historial(mascota)
+
+    # --------------------------------------------------------
+    # PRUEBA DE LAS REGLAS DE VALIDACIÓN
+    # --------------------------------------------------------
+
+    print("\n======================================")
+    print("     PRUEBA DE VALIDACIONES")
+    print("======================================")
+
+    try:
+        Mascota(
+            nombre="   ",
+            especie="Gato",
+            raza="Criollo",
+            edad=2,
+            sexo="Macho",
+            peso=4.0,
+            propietario=propietario
+        )
+    except ValueError as error:
+        print(f"Error controlado: {error}")
+
+    try:
+        Consulta(
+            id="C002",
+            mascota=mascota,
+            veterinario=veterinario,
+            fecha=datetime.now(),
+            sintomas=[],
+            observaciones="Sin molestias."
+        )
+    except ValueError as error:
+        print(f"Error controlado: {error}")
+
+    consulta_sin_analisis = Consulta(
+        id="C003",
+        mascota=mascota,
+        veterinario=veterinario,
+        fecha=datetime.now(),
+        sintomas=[Sintoma("Vómito")],
+        observaciones="Consulta de control."
+    )
+
+    try:
+        veterinario.establecer_diagnostico(
+            consulta_sin_analisis,
+            enfermedades[0],
+            "Diagnóstico sin análisis previo."
+        )
+    except ValueError as error:
+        print(f"Error controlado: {error}")
+
+    # Mascota sin consultas: el historial informa, no falla.
+    mascota_nueva = Mascota(
+        nombre="Michi",
+        especie="Gato",
+        raza="Criollo",
+        edad=2,
+        sexo="Macho",
+        peso=4.0,
+        propietario=propietario
+    )
+
+    mostrar_historial(mascota_nueva)
+
+
+# ============================================================
+# EJECUTAR EL PROGRAMA
+# ============================================================
+
+if __name__ == "__main__":
+    ejecutar_programa()
+
