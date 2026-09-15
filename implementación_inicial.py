@@ -142,6 +142,51 @@ class Sintoma:
         return self.nombre.lower() == otro.nombre.lower()
 
 
+@dataclass(eq=False)
+class Enfermedad:
+    nombre: str
+    sintomas: list[Sintoma]
+    especies: list[str]
+
+    def __post_init__(self):
+
+        if texto_vacio(self.nombre):
+            raise ValueError("El nombre de la enfermedad es obligatorio.")
+
+        if len(self.sintomas) == 0:
+            raise ValueError("La enfermedad debe tener al menos un síntoma.")
+
+        if len(self.especies) == 0:
+            raise ValueError("La enfermedad debe tener al menos una especie.")
+
+
+    def aplica_a_especie(self, especie):
+        for especie_registrada in self.especies:
+            if especie_registrada.lower() == "todas":
+                return True
+
+            if especie_registrada.lower() == especie.lower():
+                return True
+
+        return False
+
+    # R3
+    def calcular_coincidencia(self, sintomas_consulta):
+        sintomas_coincidentes = 0
+
+        for sintoma_enfermedad in self.sintomas:
+            for sintoma_consulta in sintomas_consulta:
+                if sintoma_enfermedad.es_igual_a(sintoma_consulta):
+                    sintomas_coincidentes += 1
+                    break
+
+        if len(self.sintomas) == 0:
+            return 0.0
+
+        porcentaje = (sintomas_coincidentes / len(self.sintomas)) * 100
+        return porcentaje
+
+
 # ============================================================
 # PROGRAMA PRINCIPAL
 # ============================================================
