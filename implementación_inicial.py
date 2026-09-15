@@ -186,6 +186,218 @@ class Enfermedad:
         porcentaje = (sintomas_coincidentes / len(self.sintomas)) * 100
         return porcentaje
 
+@dataclass
+class Tratamiento:
+    medicamentos: list[str]
+    dosis: str
+    frecuencia: str
+    duracion: str
+    indicaciones: str
+    recomendaciones: str
+
+
+@dataclass(eq=False)
+class Consulta:
+    id: str
+    mascota: Mascota
+    veterinario: Veterinario
+    fecha: datetime
+    sintomas: list[Sintoma]
+    observaciones: str
+
+    enfermedad_diagnosticada: Enfermedad | None = None
+    fecha_diagnostico: datetime | None = None
+    observaciones_diagnostico: str | None = None
+
+    tratamiento: Tratamiento | None = None
+
+    enfermedades_posibles: list[Enfermedad] = field(default_factory=list)
+
+    analisis_realizado: bool = False
+
+    def __post_init__(self):
+
+        if texto_vacio(self.id):
+            raise ValueError("La consulta debe tener un identificador.")
+
+        if self.mascota is None:
+            raise ValueError("La consulta debe tener una mascota.")
+
+        if self.veterinario is None:
+            raise ValueError("La consulta debe tener un veterinario.")
+
+        if len(self.sintomas) == 0:
+            raise ValueError("La consulta debe tener al menos un síntoma.")
+
+        self.mascota.agregar_consulta(self)
+        self.veterinario.registrar_consulta(self)
+
+    # R3
+    def analizar_molestias(self, enfermedades):
+
+        if len(self.sintomas) == 0:
+            raise ValueError("No se puede analizar una consulta sin síntomas.")
+        self.enfermedades_posibles = []
+
+        resultados = []
+
+        for enfermedad in enfermedades:
+            if enfermedad.aplica_a_especie(self.mascota.especie):
+                porcentaje = enfermedad.calcular_coincidencia(self.sintomas)
+
+                if porcentaje > 0:
+                    resultados.append((enfermedad, porcentaje))
+
+        resultados.sort(key=lambda resultado: resultado[1],reverse=True)
+
+        for enfermedad, porcentaje in resultados:
+            self.enfermedades_posibles.append(enfermedad)
+
+        self.analisis_realizado = True
+
+        return resultados
+
+    # R4
+    def registrar_diagnostico(self, enfermedad, fecha, observaciones):
+
+        if not self.analisis_realizado:
+            raise ValueError("Primero se debe realizar el análisis.")
+
+        if enfermedad is None:
+            raise ValueError("Se debe indicar la enfermedad diagnosticada.")
+
+        self.enfermedad_diagnosticada = enfermedad
+        self.fecha_diagnostico = fecha
+        self.observaciones_diagnostico = observaciones
+
+
+@dataclass(eq=False)
+class Cita:
+    id: str
+    mascota: Mascota
+    veterinario: Veterinario
+    fecha_hora: datetime
+    estado: str = "programada"
+    consulta: Consulta | None = None
+
+
+def mostrar_resultados_analisis(resultados):
+
+    print("\n======================================")
+    print("      POSIBLES ENFERMEDADES")
+    print("======================================")
+
+    if len(resultados) == 0:
+        print("No se encontraron enfermedades relacionadas.")
+        return
+
+    for enfermedad, porcentaje in resultados:
+
+        print(f"- {enfermedad.nombre}: {porcentaje:.2f}% de coincidencia")
+
+
+def mostrar_historial(mascota):
+
+    print("\n======================================")
+    print("       HISTORIAL MÉDICO")
+    print("======================================")
+
+    historial = mascota.consultar_historial()
+
+    if len(historial) == 0:
+        print(f"{mascota.nombre} no tiene consultas registradas.")
+        return
+
+    for consulta in historial:
+
+        print("\n--------------------------------------")
+        print(f"Consulta: {consulta.id}")
+        print(
+            f"Fecha: "
+            f"{consulta.fecha.strftime('%d/%m/%Y %H:%M')}"
+        )
+        print(
+            f"Veterinario: {consulta.veterinario.nombre}"
+        )
+
+        print("Síntomas:")
+
+        for sintoma in consulta.sintomas:
+            print(f"- {sintoma.nombre}")
+
+        print(f"Observaciones: {consulta.observaciones}")
+
+        if consulta.enfermedad_diagnosticada is not None:
+
+            print(
+                "Diagnóstico: "
+                f"{consulta.enfermedad_diagnosticada.nombre}"
+            )
+
+            print(
+                "Observaciones del diagnóstico: "
+                f"{consulta.observaciones_diagnostico}"
+            )
+
+        else:
+            print("Diagnóstico: Sin diagnóstico registrado.")
+
+
+
+def cargar_catalogo_enfermedades():
+
+    fiebre = Sintoma("Fiebre")
+    tos = Sintoma("Tos")
+    perdida_apetito = Sintoma("Pérdida de apetito")
+    vomito = Sintoma("Vómito")
+    diarrea = Sintoma("Diarrea")
+    estornudos = Sintoma("Estornudos")
+
+    gripe_canina = Enfermedad(
+        nombre="Gripe canina",
+        sintomas=[
+            fiebre,
+            tos,
+            perdida_apetito
+        ],
+        especies=["Perro"]
+    )
+
+    gastroenteritis = Enfermedad(
+        nombre="Gastroenteritis",
+        sintomas=[
+            vomito,
+            diarrea,
+            perdida_apetito
+        ],
+        especies=["Perro", "Gato"]
+    )
+
+    rinotraqueitis = Enfermedad(
+        nombre="Rinotraqueítis felina",
+        sintomas=[
+            estornudos,
+            fiebre,
+            perdida_apetito
+        ],
+        especies=["Gato"]
+    )
+
+    infeccion_general = Enfermedad(
+        nombre="Infección general",
+        sintomas=[
+            fiebre,
+            perdida_apetito
+        ],
+        especies=["Todas"]
+    )
+
+    return [
+        gripe_canina,
+        gastroenteritis,
+        rinotraqueitis,
+        infeccion_general
+    ]
 
 # ============================================================
 # PROGRAMA PRINCIPAL
