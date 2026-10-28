@@ -111,11 +111,6 @@ class Veterinario(Persona):
         return diagnostico
 
 
-class Recepcionista(Persona):
-    def rol(self):
-        return "Recepcionista"
-
-
 # ============================================================
 # CATÁLOGO: SÍNTOMA Y ENFERMEDAD
 # ============================================================
