@@ -1,0 +1,1 @@
+# Solo se utiliza la biblioteca estándar de Python (Tkinter incluido en instalaciones comunes).
