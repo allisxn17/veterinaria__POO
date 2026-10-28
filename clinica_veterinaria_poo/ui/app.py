@@ -122,7 +122,7 @@ class ClinicaApp(tk.Tk):
         self._section(
             p,
             "Personal de la clínica",
-            "Registra a los veterinarios y recepcionistas."
+            "Registra a los veterinarios."
         )
 
         staff = ttk.LabelFrame(
