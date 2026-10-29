@@ -122,7 +122,7 @@ class ClinicaApp(tk.Tk):
         self._section(
             p,
             "Personal de la clínica",
-            "Registra a los veterinarios."
+            "Registra a los veterinarios y recepcionistas de la clinica."
         )
 
         staff = ttk.LabelFrame(
@@ -172,6 +172,13 @@ self.staff_role.current(0)
             text="Registrar personal",
             command=self._registrar_personal
         ).grid(row=2, column=1, sticky="w", padx=8, pady=5)
+
+        self.staff_tree = self._tree(
+            p,
+            ("nombre", "documento", "telefono", "rol"),
+            ("Nombre", "Documento", "Teléfono", "Rol"),
+            6
+        )
 
     def _crear_consultas(self):
         p = self.tab_consultas
@@ -517,6 +524,34 @@ self.staff_role.current(0)
                 self.dis_tree.insert("", "end", values=(e.nombre, ", ".join(e.especies),
                     ", ".join(s.nombre for s in e.sintomas)))
 
+
+        if hasattr(self, "staff_tree"):
+            self._clear_tree(self.staff_tree)
+
+            for v in self.clinica.veterinarios:
+                self.staff_tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        v.nombre,
+                        v.documento,
+                        v.telefono,
+                        "Veterinario"
+                    )
+                )
+
+            for r in self.clinica.recepcionistas:
+                self.staff_tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        r.nombre,
+                        r.documento,
+                        r.telefono,
+                        "Recepcionista"
+                    )
+                )
+        
 
 def iniciar_interfaz(clinica):
     app = ClinicaApp(clinica)
