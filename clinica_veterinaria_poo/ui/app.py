@@ -153,9 +153,15 @@ class ClinicaApp(tk.Tk):
         self.staff_role = ttk.Combobox(
             staff,
             state="readonly",
-            values=["Veterinario"],
+            values=["Veterinario", "Recepcionista"],
             width=22
         )
+
+self.staff_role.grid(
+    row=2, column=0, sticky="w", padx=8, pady=5
+)
+
+self.staff_role.current(0)
         self.staff_role.grid(
             row=2, column=0, sticky="w", padx=8, pady=5
         )
