@@ -77,6 +77,13 @@ class Propietario(Persona):
     def consultar_mascotas(self):
         return list(self.mascotas)
 
+class Recepcionista(Persona):
+    def __init__(self, nombre, documento, telefono):
+        super().__init__(nombre, documento, telefono)
+
+    def rol(self):
+        return "Recepcionista"
+
 
 class Veterinario(Persona):
     def __init__(self, nombre, documento, telefono):
